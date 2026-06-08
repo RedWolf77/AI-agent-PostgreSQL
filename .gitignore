@@ -2,3 +2,5 @@
 1_merge_python_code.py
 .DS_STORE
 .env
+__pycache__/
+.idea/
