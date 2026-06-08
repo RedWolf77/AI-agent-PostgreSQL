@@ -110,3 +110,25 @@ def save_actor_to_db(actor: ActorSchema):
             VALUES (%s, %s, %s, %s, %s)
             RETURNING "id_актер";
         """
+    
+    try:
+        with psycopg2.connect(**connection_config) as connection:
+            with connection.cursor() as cursor:
+                # Передаем параметры
+                cursor.execute(query, (
+                    actor.last_name,
+                    actor.first_name,
+                    actor.middle_name,
+                    actor.birth_date,
+                    actor.death_date,
+                ))
+
+                # Возвращаем сгенерирвоанный ID
+                generated_id = cursor.fetchone()[0]
+
+                connection.commit()
+                print(f"Запись добавлена: Актер '{actor.last_name} {actor.first_name}' ID: {generated_id}")
+                return generated_id
+    except Exception as error:
+        print(f"Ошибка при работе с PostgreSQL: {error}")
+        return None
