@@ -1,6 +1,6 @@
 from system_settings import llm
-from agent_tools import search_internet, save_movie_to_db
-from schemas import MovieSchema, RouterSchema, AgentState
+from agent_tools import search_internet, save_movie_to_db, save_actor_to_db
+from schemas import MovieSchema, RouterSchema, AgentState, ActorSchema
 
 # Узел-диспетчер
 def router_node(state: AgentState) -> dict:
@@ -59,7 +59,26 @@ def add_movie_node(state: AgentState) -> dict:
 def add_actor_node(state: AgentState) -> dict:
     actor_name = state["extracted_name"]
     print(f"\n[Узел: Актеры] Запускаю процесс добавления актера: {actor_name}")
-    # Здесь в будущем будет логика поиска актера
+
+    structured_llm = llm.with_structured_output(MovieSchema)
+
+    query = f"фильм {actor_name} сюжет возрастной рейтинг кинопоиск"
+
+    raw_data = search_internet(query)
+
+    prompt = f"""
+            Проанализируй собранные тексты из нескольких источников об актере и заполни структуру ActorSchema.
+
+            КРИТИЧЕСКИЕ ТРЕБОВАНИЯ:
+            1. Заполняй все текстовые поля СТРОГО НА РУССКОМ ЯЗЫКЕ.
+
+            Собранные тексты из интернета:
+            {raw_data['web_content']}
+        """
+
+    actor_obj = structured_llm.invoke(prompt)
+    save_actor_to_db(actor_obj)
+
     return {"final_response": f"Актер '{actor_name}' успешно добавлен в базу!"}
 
 
