@@ -34,10 +34,30 @@ workflow.add_edge("unknown", END)
 # Компилируем
 app = workflow.compile()
 
-q = "Слушай, а добавь в базу фильм 'Начало' Кристофера Нолана"
+while True:
+    print("=== ИИ-Справочник Фильмов: ===")
+    try:
+        print("Чтобы выйти, введите 'exit'")
+        q = input("--> ").strip()
 
-print(f"ПОЛЬЗОВАТЕЛЬ: {q}")
+        if q == 'exit':
+            print("Завершение работы.")
+            break
 
-result = app.invoke({"user_query": q})
+        # игнорирование пустых вводов
+        if not q:
+            continue
 
-print(f"\nОТВЕТ АГЕНТА: {result['final_response']}")
+        result = app.invoke({"user_query": q})
+
+        print(f"\nОТВЕТ АГЕНТА: {result['final_response']}")
+        print("-" * 60)
+
+    except KeyboardInterrupt:
+        print("\nПрограмма принудительно остановлена пользователем.")
+        break
+
+    except Exception as e:
+        print(f"\n[Критическая ошибка] Произошел сбой при обработке запроса: {e}")
+        print("Вы можете продолжить отправку запросов.\n")
+        print("-" * 60)
