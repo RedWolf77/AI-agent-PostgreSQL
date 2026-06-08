@@ -60,7 +60,7 @@ def add_actor_node(state: AgentState) -> dict:
     actor_name = state["extracted_name"]
     print(f"\n[Узел: Актеры] Запускаю процесс добавления актера: {actor_name}")
 
-    structured_llm = llm.with_structured_output(MovieSchema)
+    structured_llm = llm.with_structured_output(ActorSchema)
 
     query = f"фильм {actor_name} сюжет возрастной рейтинг кинопоиск"
 
