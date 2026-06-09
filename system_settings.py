@@ -7,7 +7,7 @@ load_dotenv()
 os.environ["USER_AGENT"] = "MovieAgent/1.0 (Educational Academic Project)"
 
 llm = ChatOpenAI(
-    model="qwen2.5-coder:7b",
+    model="qwen2.5:7b",
     api_key="ollama",
     base_url="http://localhost:11434/v1",
     temperature=0
