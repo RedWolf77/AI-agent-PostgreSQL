@@ -4,8 +4,12 @@ from datetime import date
 
 # схема для LLM
 class RouterSchema(BaseModel):
-    intent: Literal["add_movie", "add_actor", "unknown"] = Field(
-        description="Определи намерение пользователя. Что он хочет сделать? Возможно либо добавления фильма, либо добавление актера."
+    intent: Literal["add_movie", "add_actor", "delete_movie", "unknown"] = Field(
+        description= (
+            "Точное намерение пользователя. "
+            "ВНИМАТЕЛЬНО анализируй глаголы! "
+            "Что пользователь хочет сделать? Возможно: добавления фильма, добавление актера, удаление фильма. "
+        )
     )
     entity_name: str = Field(
         description="Название фильма или имя актера для поиска/добавления/удаления.",
