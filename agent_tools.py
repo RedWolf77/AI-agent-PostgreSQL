@@ -110,7 +110,7 @@ def save_actor_to_db(actor: ActorSchema):
             VALUES (%s, %s, %s, %s, %s)
             RETURNING "id_актер";
         """
-    
+
     try:
         with psycopg2.connect(**connection_config) as connection:
             with connection.cursor() as cursor:
@@ -132,3 +132,38 @@ def save_actor_to_db(actor: ActorSchema):
     except Exception as error:
         print(f"Ошибка при работе с PostgreSQL: {error}")
         return None
+
+
+def search_movies_in_db(title: str) -> list:
+    """
+    Поиск существующих фильмов в БД для верификации перед удалением
+    """
+    query = """
+        SELECT "id_фильм", "название", "сюжет" 
+        FROM "Справочник Фильмов"."Фильм"
+        WHERE "название" ILIKE %s;
+    """
+    try:
+        with psycopg2.connect(**connection_config) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, (f"%{title}%",))
+                rows = cursor.fetchall()
+                return [{"id": r[0], "name": r[1], "plot": r[2][:50] + "..."} for r in rows]
+    except Exception as e:
+        print(f"Ошибка поиска в БД: {e}")
+        return []
+
+def delete_movie_from_db(movie_id: int) -> bool:
+    """
+    Удаление фильма по первичному ключу ID
+    """
+    query = 'DELETE FROM "Справочник Фильмов"."Фильм" WHERE "id_фильм" = %s;'
+    try:
+        with psycopg2.connect(**connection_config) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, (movie_id,))
+                conn.commit()
+                return True
+    except Exception as e:
+        print(f"Ошибка удаления из БД: {e}")
+        return False
