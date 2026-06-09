@@ -1,4 +1,4 @@
-from router import router_node, add_movie_node, add_actor_node, unknown_node, route_logic
+from router import router_node, add_movie_node, add_actor_node, delete_movie_node, unknown_node, route_logic
 from langgraph.graph import StateGraph, END
 from schemas import AgentState
 
@@ -9,6 +9,7 @@ workflow = StateGraph(AgentState)
 workflow.add_node("router", router_node)
 workflow.add_node("add_movie", add_movie_node)
 workflow.add_node("add_actor", add_actor_node)
+workflow.add_node("delete_movie", delete_movie_node)
 workflow.add_node("unknown", unknown_node)
 
 # Устанавливаем стартовую точку
@@ -22,6 +23,7 @@ workflow.add_conditional_edges(
         # Карта переходов: если функция вернула ключ, идем в значение (имя узла)
         "add_movie": "add_movie",
         "add_actor": "add_actor",
+        "delete_movie": "delete_movie",
         "unknown": "unknown"
     }
 )
@@ -29,6 +31,7 @@ workflow.add_conditional_edges(
 # Завершаем граф после выполнения ветки
 workflow.add_edge("add_movie", END)
 workflow.add_edge("add_actor", END)
+workflow.add_edge("delete_movie", END)
 workflow.add_edge("unknown", END)
 
 # Компилируем
