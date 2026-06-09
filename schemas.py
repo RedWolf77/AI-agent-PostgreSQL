@@ -8,7 +8,7 @@ class RouterSchema(BaseModel):
         description="Определи намерение пользователя. Что он хочет сделать? Возможно либо добавления фильма, либо добавление актера."
     )
     entity_name: str = Field(
-        description="Название фильма или имя актера, которое запросил пользователь. Если не найдено, верни пустую строку.",
+        description="Название фильма или имя актера для поиска/добавления/удаления.",
         default=""
     )
 
@@ -17,6 +17,7 @@ class AgentState(TypedDict):
     user_query: str                          # Запрос пользователя
     intent: Optional[str]                    # Намерение (add_movie, и т.д.)
     extracted_name: Optional[str]            # Извлеченное название/имя
+    found_records: Optional[list]            # Хранилище записей, найденных в БД перед удалением
     final_response: Optional[str]            # Итоговый ответ пользователю
 
 
