@@ -4,7 +4,7 @@ from datetime import date
 
 # схема для LLM
 class RouterSchema(BaseModel):
-    intent: Literal["add_movie", "add_actor", "delete_movie", "unknown"] = Field(
+    intent: Literal["add_movie", "add_actor", "delete_movie", "delete_actor", "unknown"] = Field(
         description= (
             "Точное намерение пользователя. "
             "ВНИМАТЕЛЬНО анализируй глаголы! "
