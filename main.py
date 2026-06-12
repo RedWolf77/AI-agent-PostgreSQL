@@ -1,4 +1,7 @@
-from router import router_node, add_movie_node, add_actor_node, delete_movie_node, unknown_node, route_logic
+from router import (
+    router_node, add_movie_node, add_actor_node,
+    delete_actor_node, delete_movie_node, unknown_node, route_logic
+)
 from langgraph.graph import StateGraph, END
 from schemas import AgentState
 
@@ -10,6 +13,7 @@ workflow.add_node("router", router_node)
 workflow.add_node("add_movie", add_movie_node)
 workflow.add_node("add_actor", add_actor_node)
 workflow.add_node("delete_movie", delete_movie_node)
+workflow.add_node("delete_actor", delete_actor_node)
 workflow.add_node("unknown", unknown_node)
 
 # Устанавливаем стартовую точку
@@ -24,6 +28,7 @@ workflow.add_conditional_edges(
         "add_movie": "add_movie",
         "add_actor": "add_actor",
         "delete_movie": "delete_movie",
+        "delete_actor": "delete_actor",
         "unknown": "unknown"
     }
 )
@@ -32,6 +37,7 @@ workflow.add_conditional_edges(
 workflow.add_edge("add_movie", END)
 workflow.add_edge("add_actor", END)
 workflow.add_edge("delete_movie", END)
+workflow.add_edge("delete_actor", END)
 workflow.add_edge("unknown", END)
 
 # Компилируем
