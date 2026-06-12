@@ -167,3 +167,59 @@ def delete_movie_from_db(movie_id: int) -> bool:
     except Exception as e:
         print(f"Ошибка удаления из БД: {e}")
         return False
+
+
+def search_actors_in_db(name: str) -> list:
+    """
+    Поиск существующих актеров в БД для верификации перед удалением.
+    Поиск ведется по Имени, Фамилии или Отчеству.
+    """
+    query = """
+        SELECT * 
+        FROM "Справочник Фильмов"."Актер"
+        WHERE concat_ws(' ', trim("Фамилия"), trim("Имя"), trim("Отчество")) ILIKE ALL(%s);
+    """
+    try:
+        with psycopg2.connect(**connection_config) as conn:
+            with conn.cursor() as cursor:
+                # Разбиваем строку на слова и каждое слово оборачиваем в %%
+                search_words = [f"%{word}%" for word in name.strip().split()]
+
+                cursor.execute(query, (search_words,))
+                rows = cursor.fetchall()
+
+                results = []
+                for r in rows:
+                    f_name = r[1].strip() if r[1] else ""
+                    i_name = r[2].strip() if r[2] else ""
+                    o_name = r[3].strip() if r[3] else ""
+
+                    # Собираем ФИО
+                    full_name = " ".join(filter(None, [f_name, i_name, o_name]))
+                    b_date = str(r[4]) if r[4] else "Не указана"
+
+                    results.append({
+                        "id": r[0],
+                        "name": full_name,
+                        "birth_date": b_date
+                    })
+                return results
+    except Exception as e:
+        print(f"Ошибка поиска актеров в БД: {e}")
+        return []
+
+
+def delete_actor_from_db(actor_id: int) -> bool:
+    """
+    Удаление актера по первичному ключу ID
+    """
+    query = 'DELETE FROM "Справочник Фильмов"."Актер" WHERE "id_актер" = %s;'
+    try:
+        with psycopg2.connect(**connection_config) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, (actor_id,))
+                conn.commit()
+                return True
+    except Exception as e:
+        print(f"Ошибка удаления актера из БД: {e}")
+        return False
