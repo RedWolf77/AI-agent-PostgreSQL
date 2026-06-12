@@ -1,5 +1,8 @@
 from system_settings import llm
-from agent_tools import search_internet, save_movie_to_db, save_actor_to_db, search_movies_in_db, delete_movie_from_db
+from agent_tools import (
+    search_internet, save_movie_to_db, save_actor_to_db, search_movies_in_db,
+    delete_movie_from_db, search_actors_in_db, delete_actor_from_db
+)
 from schemas import MovieSchema, RouterSchema, AgentState, ActorSchema
 
 # Узел-диспетчер
@@ -126,6 +129,52 @@ def delete_movie_node(state: AgentState) -> dict:
         }
     except ValueError:
         return {"final_response": "Некорректный ввод. Операция удаления прервана."}
+
+
+# Узел удаления актера
+def delete_actor_node(state: AgentState) -> dict:
+    actor_name = state["extracted_name"]
+    print(f"\n[Узел: Удаление Актера] Запуск процесса поиска актера: '{actor_name}'")
+
+    records = search_actors_in_db(actor_name)
+
+    if not records:
+        return {"final_response": f"Удаление невозможно: актер '{actor_name}' не найден в базе данных."}
+
+    # Если найден ровно один актер
+    if len(records) == 1:
+        target = records[0]
+        print(f"[Узел: Удаление Актера] Найдено точное совпадение: ID {target['id']} - {target['name']} (ДР: {target['birth_date']})")
+
+        confirm = input(f"Вы действительно хотите удалить актера '{target['name']}'? (да/нет): ").strip().lower()
+        if confirm in ["да", "yes", "y"]:
+            success = delete_actor_from_db(target['id'])
+            msg = f"Актер '{target['name']}' успешно удален из базы данных." if success else "Ошибка при удалении."
+        else:
+            msg = "Удаление отменено пользователем."
+        return {"final_response": msg}
+
+    # Если найдено несколько актеров
+    print(f"\n[Узел: Удаление Актера] Найдено несколько совпадений ({len(records)}):")
+    for idx, rec in enumerate(records, start=1):
+        print(f"  [{idx}]  ФИО: {rec['name']} | Дата рождения: {rec['birth_date']} | ID: {rec['id']} ")
+
+    try:
+        choice = input("\nВведите номер записи для удаления (или 0 для отмены): ").strip()
+        choice_idx = int(choice)
+
+        if choice_idx == 0 or choice_idx > len(records):
+            return {"final_response": "Удаление отменено."}
+
+        target = records[choice_idx - 1]
+        success = delete_actor_from_db(target['id'])
+
+        return {
+            "final_response": f"Актер '{target['name']}' (ID: {target['id']}) успешно удален." if success else "Ошибка при удалении."
+        }
+    except ValueError:
+        return {"final_response": "Некорректный ввод. Операция удаления прервана."}
+
 
 def unknown_node(state: AgentState) -> dict:
     print("\n[Узел: Неизвестно] Не удалось определить действие.")
